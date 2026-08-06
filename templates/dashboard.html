@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas AI — Financial Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="glow-blob blob-1"></div>
+    <div class="glow-blob blob-2"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">
+            <i class="fa-solid fa-chart-line"></i> ATLAS<span>AI</span>
+        </div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="#features">Features</a>
+            <a href="/dashboard" class="active">Dashboard</a>
+        </div>
+        <div>
+            <!-- Sync box -->
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="number" id="sync-tg-id" placeholder="Enter Telegram ID..." style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white; padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.85rem;" value="99999">
+                <button onclick="syncUserData()" class="btn-primary" style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 8px;">Sync</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="dashboard-sidebar">
+            <div class="glass-card user-profile-widget">
+                <div class="avatar" id="avatar-initials">U</div>
+                <div class="user-name" id="user-display-name">Demo User</div>
+                <div class="user-role" id="user-role-label">INVESTOR</div>
+            </div>
+            
+            <div class="glass-card dashboard-nav">
+                <a href="#" class="db-nav-item active"><i class="fa-solid fa-house"></i> Overview</a>
+                <a href="https://t.me/your_bot_username" target="_blank" class="db-nav-item"><i class="fa-brands fa-telegram"></i> Bot Chat</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="dashboard-content">
+            <!-- Indices metrics row -->
+            <div class="metrics-row">
+                <div class="glass-card metric-card" id="index-sp500">
+                    <span class="metric-label">S&P 500 Index</span>
+                    <span class="metric-value" id="sp500-price">---</span>
+                    <span class="metric-change" id="sp500-change">--%</span>
+                </div>
+                <div class="glass-card metric-card" id="index-nasdaq">
+                    <span class="metric-label">NASDAQ Composite</span>
+                    <span class="metric-value" id="nasdaq-price">---</span>
+                    <span class="metric-change" id="nasdaq-change">--%</span>
+                </div>
+                <div class="glass-card metric-card" id="index-dow">
+                    <span class="metric-label">Dow Jones Industrial</span>
+                    <span class="metric-value" id="dow-price">---</span>
+                    <span class="metric-change" id="dow-change">--%</span>
+                </div>
+            </div>
+
+            <!-- Chart & Watchlist row -->
+            <div class="visuals-row">
+                <div class="glass-card chart-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3 id="chart-title">Historical Price (AAPL)</h3>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="updateChartPeriod('1mo')" class="btn-secondary" style="padding: 0.3rem 0.7rem; font-size: 0.8rem; border-radius: 6px;">1M</button>
+                            <button onclick="updateChartPeriod('6mo')" class="btn-secondary" style="padding: 0.3rem 0.7rem; font-size: 0.8rem; border-radius: 6px;">6M</button>
+                            <button onclick="updateChartPeriod('1y')" class="btn-secondary" style="padding: 0.3rem 0.7rem; font-size: 0.8rem; border-radius: 6px;">1Y</button>
+                        </div>
+                    </div>
+                    <div style="position: relative; height: 280px; width: 100%;">
+                        <canvas id="priceChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="glass-card watchlist-card">
+                    <h3>My Watchlist</h3>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="add-ticker-input" placeholder="AAPL" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white; padding: 0.4rem; border-radius: 8px; flex: 1; text-transform: uppercase;">
+                        <button onclick="addTicker()" class="btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; border-radius: 8px;"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                    <div class="watchlist-list" id="watchlist-items-list">
+                        <!-- Watchlist items appended here -->
+                        <div class="watchlist-item">
+                            <div class="item-left">
+                                <span class="item-symbol">AAPL</span>
+                                <span class="item-name">Apple Inc.</span>
+                            </div>
+                            <div class="item-right">
+                                <span class="item-price">$185.40</span>
+                                <span class="item-change pos">+1.25%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat logs & config section -->
+            <div class="visuals-row">
+                <div class="glass-card history-card">
+                    <h3>Synced Conversation History</h3>
+                    <div class="history-list" id="chat-history-list">
+                        <!-- History logs -->
+                        <div class="history-item user-msg">
+                            <div class="history-meta">
+                                <span class="history-sender">USER</span>
+                                <span>2026-08-06 10:30</span>
+                            </div>
+                            <div class="history-body">What is Apple's current stock price?</div>
+                        </div>
+                        <div class="history-item bot-msg">
+                            <div class="history-meta">
+                                <span class="history-sender">ATLAS AI</span>
+                                <span>2026-08-06 10:30</span>
+                            </div>
+                            <div class="history-body">Apple Inc. (AAPL) is currently trading at **$185.40**, up **1.25%** today.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <h3>Profile Preferences</h3>
+                    <div>
+                        <span class="metric-label" style="display: block; margin-bottom: 0.5rem;">Briefing Schedule</span>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <i class="fa-solid fa-clock" style="color: var(--accent-cyan);"></i>
+                            <span id="briefing-time-label" style="font-size: 1.1rem; font-weight: 600;">08:30 AM (Daily)</span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="metric-label" style="display: block; margin-bottom: 0.5rem;">Monitored Interests</span>
+                        <div id="interests-tags" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                            <span class="suggestion-pill" style="cursor: default;">Technology</span>
+                            <span class="suggestion-pill" style="cursor: default;">Markets</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border-color); font-size: 0.8rem; color: var(--text-secondary);">
+                        <i class="fa-solid fa-shield-halved" style="margin-right: 0.25rem;"></i> SQLite Sync Active
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripting -->
+    <script>
+        let myChart = null;
+        let activeTicker = "AAPL";
+        let activePeriod = "1mo";
+        let currentUserId = 99999; // Default sandbox user ID
+
+        window.onload = async function() {
+            // Load indices
+            await loadIndices();
+            // Sync user data
+            await syncUserData();
+            // Set periodic index refresh
+            setInterval(loadIndices, 60000);
+        }
+
+        async function loadIndices() {
+            const indexTickers = {
+                sp500: '^GSPC',
+                nasdaq: '^IXIC',
+                dow: '^DJI'
+            };
+            
+            for (const [key, ticker] of Object.entries(indexTickers)) {
+                try {
+                    const res = await fetch(`/api/quote/${encodeURIComponent(ticker)}`);
+                    const data = await res.json();
+                    if (data.status === "success") {
+                        const valEl = document.getElementById(`${key}-price`);
+                        const chgEl = document.getElementById(`${key}-change`);
+                        
+                        valEl.textContent = `$${data.price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                        
+                        const sign = data.change >= 0 ? '+' : '';
+                        chgEl.textContent = `${sign}${data.change} (${sign}${data.pct_change}%)`;
+                        
+                        if (data.change >= 0) {
+                            chgEl.className = 'metric-change pos';
+                            chgEl.style.color = 'var(--neon-green)';
+                        } else {
+                            chgEl.className = 'metric-change neg';
+                            chgEl.style.color = 'var(--neon-red)';
+                        }
+                    }
+                } catch (e) {
+                    console.error("Failed to load index", ticker, e);
+                }
+            }
+        }
+
+        async function syncUserData() {
+            const inputVal = document.getElementById('sync-tg-id').value.trim();
+            if (!inputVal) return;
+            currentUserId = parseInt(inputVal);
+
+            try {
+                const res = await fetch(`/api/user/${currentUserId}`);
+                const data = await res.json();
+                
+                if (data.status === "success") {
+                    const user = data.user;
+                    // Update user card
+                    document.getElementById('user-display-name').textContent = user.first_name || user.username || `User ${user.telegram_id}`;
+                    document.getElementById('avatar-initials').textContent = (user.first_name || user.username || "U")[0].toUpperCase();
+                    document.getElementById('user-role-label').textContent = user.role.toUpperCase();
+                    document.getElementById('briefing-time-label').textContent = `${user.briefing_time} (Daily)`;
+                    
+                    // Render tags
+                    const tagContainer = document.getElementById('interests-tags');
+                    tagContainer.innerHTML = '';
+                    user.interests.split(',').forEach(tag => {
+                        const tagEl = document.createElement('span');
+                        tagEl.className = 'suggestion-pill';
+                        tagEl.style.cursor = 'default';
+                        tagEl.textContent = tag.trim();
+                        tagContainer.appendChild(tagEl);
+                    });
+
+                    // Render Watchlist
+                    const wlContainer = document.getElementById('watchlist-items-list');
+                    wlContainer.innerHTML = '';
+                    if (data.watchlist.length === 0) {
+                        wlContainer.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.85rem; padding: 1rem; text-align: center;">Watchlist is empty.</div>';
+                    } else {
+                        // Set active chart ticker to first in watchlist if activeTicker is not in list
+                        const listHasActive = data.watchlist.some(w => w.ticker === activeTicker);
+                        if (!listHasActive && data.watchlist.length > 0) {
+                            activeTicker = data.watchlist[0].ticker;
+                        }
+                        
+                        data.watchlist.forEach(item => {
+                            const wlEl = document.createElement('div');
+                            wlEl.className = `watchlist-item ${item.ticker === activeTicker ? 'active-ticker' : ''}`;
+                            wlEl.style.cursor = 'pointer';
+                            wlEl.style.border = item.ticker === activeTicker ? '1px solid var(--accent-cyan)' : '1px solid var(--border-color)';
+                            wlEl.onclick = () => {
+                                activeTicker = item.ticker;
+                                syncUserData(); // reload to highlight and update chart
+                            };
+                            
+                            const changeSign = item.pct_change >= 0 ? '+' : '';
+                            const changeClass = item.pct_change >= 0 ? 'pos' : 'neg';
+                            
+                            wlEl.innerHTML = `
+                                <div class="item-left">
+                                    <span class="item-symbol">${item.ticker}</span>
+                                    <span class="item-name">${item.name}</span>
+                                </div>
+                                <div class="item-right" style="display: flex; flex-direction: column; align-items: flex-end;">
+                                    <span class="item-price">$${item.price || 'N/A'}</span>
+                                    <span class="item-change ${changeClass}">${changeSign}${item.pct_change || '0'}%</span>
+                                    <span onclick="removeTicker(event, '${item.ticker}')" style="font-size: 0.75rem; color: var(--neon-red); margin-top: 0.25rem;"><i class="fa-solid fa-trash-can"></i></span>
+                                </div>
+                            `;
+                            wlContainer.appendChild(wlEl);
+                        });
+                    }
+
+                    // Render History
+                    const histContainer = document.getElementById('chat-history-list');
+                    histContainer.innerHTML = '';
+                    if (data.history.length === 0) {
+                        histContainer.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.85rem; padding: 1rem; text-align: center;">No history logs found.</div>';
+                    } else {
+                        data.history.forEach(h => {
+                            const itemEl = document.createElement('div');
+                            const isUser = h.sender === 'user';
+                            itemEl.className = `history-item ${isUser ? 'user-msg' : 'bot-msg'}`;
+                            
+                            // Format date
+                            const dateStr = new Date(h.timestamp).toLocaleString();
+                            
+                            itemEl.innerHTML = `
+                                <div class="history-meta">
+                                    <span class="history-sender" style="color: ${isUser ? 'var(--accent-cyan)' : 'var(--accent-violet)'}">${isUser ? 'USER' : 'ATLAS AI'}</span>
+                                    <span>${dateStr}</span>
+                                </div>
+                                <div class="history-body">${formatMarkdown(h.content)}</div>
+                            `;
+                            histContainer.appendChild(itemEl);
+                        });
+                    }
+
+                    // Load chart
+                    await drawChart();
+                } else {
+                    alert("User not found. Try entering ID 99999.");
+                }
+            } catch (e) {
+                console.error("Sync error", e);
+            }
+        }
+
+        async function drawChart() {
+            try {
+                const res = await fetch(`/api/chart/${activeTicker}?period=${activePeriod}`);
+                const rdata = await res.json();
+                if (rdata.status === "success") {
+                    document.getElementById('chart-title').textContent = `Historical Price (${activeTicker})`;
+                    
+                    const labels = rdata.data.map(d => d.date);
+                    const prices = rdata.data.map(d => d.close);
+                    
+                    const ctx = document.getElementById('priceChart').getContext('2d');
+                    
+                    if (myChart) {
+                        myChart.destroy();
+                    }
+                    
+                    // Create gradient
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+                    gradient.addColorStop(0, 'rgba(0, 242, 254, 0.25)');
+                    gradient.addColorStop(1, 'rgba(124, 58, 237, 0.02)');
+                    
+                    myChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: `${activeTicker} Close Price`,
+                                data: prices,
+                                borderColor: '#00f2fe',
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                fill: true,
+                                backgroundColor: gradient,
+                                lineTension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                x: {
+                                    grid: { display: false },
+                                    ticks: { color: '#94a3b8', maxTicksLimit: 8, font: { size: 9 } }
+                                },
+                                y: {
+                                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                    ticks: { color: '#94a3b8', font: { size: 9 } }
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error("Chart load error", e);
+            }
+        }
+
+        async function updateChartPeriod(period) {
+            activePeriod = period;
+            await drawChart();
+        }
+
+        async function addTicker() {
+            const input = document.getElementById('add-ticker-input');
+            const ticker = input.value.trim().toUpperCase();
+            if (!ticker) return;
+
+            try {
+                const res = await fetch(`/api/watchlist/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: currentUserId, ticker: ticker })
+                });
+                const data = await res.json();
+                if (data.status === "success") {
+                    input.value = '';
+                    await syncUserData();
+                } else {
+                    alert(`Failed to add ticker: ${data.message}`);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function removeTicker(event, ticker) {
+            event.stopPropagation(); // prevent triggering active ticker click
+            if (!confirm(`Are you sure you want to remove ${ticker} from your watchlist?`)) return;
+
+            try {
+                const res = await fetch(`/api/watchlist/remove`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: currentUserId, ticker: ticker })
+                });
+                const data = await res.json();
+                if (data.status === "success") {
+                    await syncUserData();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function formatMarkdown(text) {
+            let html = text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+            
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/^\*\s(.*)$/gm, '• $1');
+            html = html.replace(/\n/g, '<br>');
+
+            if (html.includes('|')) {
+                html = '<pre style="font-family: \'Fira Code\', monospace; font-size: 0.8rem; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; overflow-x: auto;">' + html.replace(/<br>/g, '\n') + '</pre>';
+            }
+
+            return html;
+        }
+    </script>
+</body>
+</html>

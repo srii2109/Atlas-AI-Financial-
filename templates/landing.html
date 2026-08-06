@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas AI — Conversational Financial Assistant</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="glow-blob blob-1"></div>
+    <div class="glow-blob blob-2"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">
+            <i class="fa-solid fa-chart-line"></i> ATLAS<span>AI</span>
+        </div>
+        <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#features">Features</a>
+            <a href="/dashboard">Dashboard</a>
+        </div>
+        <div>
+            <a href="https://t.me/your_bot_username" target="_blank" class="btn-primary">
+                <i class="fa-brands fa-telegram"></i> Launch Bot
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>The Conversational Intel Layer for <span class="gradient-text">Financial Markets</span></h1>
+            <p>Atlas AI is a premium conversational assistant that lives inside Telegram, built for finance professionals. Conduct deep stock research, compare financials, and track watchlists naturally without switching apps.</p>
+            <div class="hero-buttons">
+                <a href="https://t.me/your_bot_username" target="_blank" class="btn-primary">
+                    <i class="fa-brands fa-telegram"></i> Connect on Telegram
+                </a>
+                <a href="/dashboard" class="btn-secondary">Explore Dashboard</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <!-- Simulated Bot Terminal -->
+            <div class="terminal">
+                <div class="terminal-header">
+                    <div class="terminal-buttons">
+                        <div class="terminal-btn btn-close"></div>
+                        <div class="terminal-btn btn-min"></div>
+                        <div class="terminal-btn btn-max"></div>
+                    </div>
+                    <div class="terminal-title">ATLAS_AI_TERMINAL.EXE</div>
+                </div>
+                <div class="terminal-body" id="terminal-body">
+                    <div class="message message-bot">Hello, I'm Atlas AI, your conversational financial analyst. You can ask me for stock prices, comparative stats, or company profiles.
+
+Try clicking one of the suggestions below!</div>
+                </div>
+                <div class="terminal-suggestions">
+                    <div class="suggestion-pill" onclick="sendSuggestion('What is Apple\'s current stock price?')">AAPL Price</div>
+                    <div class="suggestion-pill" onclick="sendSuggestion('Compare TSLA and MSFT')">Compare TSLA vs MSFT</div>
+                    <div class="suggestion-pill" onclick="sendSuggestion('Summarize Nvidia recent news')">NVDA News</div>
+                </div>
+                <div class="terminal-input-area">
+                    <input type="text" id="terminal-input" placeholder="Ask Atlas AI..." onkeypress="handleKeyPress(event)">
+                    <button class="terminal-send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <h2>Built to Simplify Your Workflow</h2>
+        <p class="features-subtitle">Atlas AI connects real-time market data, company intelligence, and multi-modal comprehension into a unified conversational experience.</p>
+        
+        <div class="features-grid">
+            <div class="glass-card feature-card">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+                <h3>Conversational Onboarding</h3>
+                <p>No lengthy signup forms. Atlas AI gathers your role, watchlists, and briefing schedules naturally through your first brief conversation.</p>
+            </div>
+            <div class="glass-card feature-card">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <h3>Real-Time Market Intel</h3>
+                <p>Get instant stock quotes, historical prices, balance sheets, and Side-by-side competitor comparisons instantly with tool-integrated Gemini reasoning.</p>
+            </div>
+            <div class="glass-card feature-card">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-microphone"></i>
+                </div>
+                <h3>Multi-Modal Audits</h3>
+                <p>Send voice notes or upload images of stock charts and earnings presentations. Atlas transcribes speech and analyzes charts automatically.</p>
+            </div>
+            <div class="glass-card feature-card">
+                <div class="feature-icon">
+                    <i class="fa-solid fa-bell"></i>
+                </div>
+                <h3>Proactive briefings</h3>
+                <p>Receive scheduled morning market briefings and alerts when stocks in your watchlist drop or surge by more than 5%.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Atlas AI Financial Assistant. Designed for top-tier financial workflows.</p>
+        <p>Hackathon Submission MVP</p>
+    </footer>
+
+    <!-- Interactive Javascript -->
+    <script>
+        function sendSuggestion(text) {
+            document.getElementById('terminal-input').value = text;
+            sendMessage();
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const inputEl = document.getElementById('terminal-input');
+            const text = inputEl.value.trim();
+            if (!text) return;
+
+            inputEl.value = '';
+
+            const bodyEl = document.getElementById('terminal-body');
+
+            // 1. Append User Message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message message-user';
+            userMsg.textContent = text;
+            bodyEl.appendChild(userMsg);
+            bodyEl.scrollTop = bodyEl.scrollHeight;
+
+            // 2. Append Typing Indicator
+            const typingMsg = document.createElement('div');
+            typingMsg.className = 'message message-bot';
+            typingMsg.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Analyzing financial data...';
+            bodyEl.appendChild(typingMsg);
+            bodyEl.scrollTop = bodyEl.scrollHeight;
+
+            try {
+                // 3. Post to API
+                // We use user_id = 99999 for simulation/web demo
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_id: 99999, message: text })
+                });
+                
+                const data = await response.json();
+                
+                // 4. Remove typing indicator and append bot message
+                bodyEl.removeChild(typingMsg);
+
+                const botMsg = document.createElement('div');
+                botMsg.className = 'message message-bot';
+                
+                // Render simple markdown tables or linebreaks if any
+                botMsg.innerHTML = formatMarkdown(data.response);
+                bodyEl.appendChild(botMsg);
+                bodyEl.scrollTop = bodyEl.scrollHeight;
+            } catch (err) {
+                console.error(err);
+                bodyEl.removeChild(typingMsg);
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'message message-bot';
+                errorMsg.textContent = "Error connecting to server. Please verify your backend configuration.";
+                bodyEl.appendChild(errorMsg);
+                bodyEl.scrollTop = bodyEl.scrollHeight;
+            }
+        }
+
+        // Extremely simple parser for markdown tables and line breaks for the terminal simulation
+        function formatMarkdown(text) {
+            let html = text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+            
+            // Format bold text **word**
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            // Format bullet points * text
+            html = html.replace(/^\*\s(.*)$/gm, '• $1');
+            
+            // Format newlines
+            html = html.replace(/\n/g, '<br>');
+
+            // If there's a table representation (e.g. | price |), we can format it nicely
+            if (html.includes('|')) {
+                // simple replace to wrap in a pre block or a simple container
+                html = '<span style="font-family: \'Fira Code\', monospace; font-size: 0.8rem;">' + html + '</span>';
+            }
+
+            return html;
+        }
+    </script>
+</body>
+</html>
